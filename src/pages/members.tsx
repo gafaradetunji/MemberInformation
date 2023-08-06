@@ -5,7 +5,7 @@ import Box from '@mui/material/Box';
 import Modal from '@mui/material/Modal';
 import Fade from '@mui/material/Fade';
 import Typography from '@mui/material/Typography';
-import img from '../assets/aishat.jpg'
+import img from '../assets/gafar.jpeg'
 import { useState } from 'react';
 import { useMember, MemberInfo } from '../context/membercontext';
 import StarRating from '../component/rating';
