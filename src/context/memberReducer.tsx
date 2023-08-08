@@ -1,12 +1,14 @@
-import Backdrop from '@mui/material/Backdrop';
-import Box from '@mui/material/Box';
-import Modal from '@mui/material/Modal';
-import Fade from '@mui/material/Fade';
-import Typography from '@mui/material/Typography';
+import React from 'react';
+import { Modal, Backdrop, Box, Fade, Typography } from '@mui/material';
 
 
+interface DeleteModalProps {
+    open: boolean;
+    onClose: () => void;
+    onConfirm: () => void;
+}
 
-export function DeleteModal({ open, onClose, onConfirm, itemId }) {
+export const DeleteModal: React.FC<DeleteModalProps> = ({ open, onClose, onConfirm }) => {
     return (
         <Modal
             aria-labelledby="transition-modal-title"

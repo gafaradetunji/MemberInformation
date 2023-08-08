@@ -1,10 +1,6 @@
 // import { Link, useNavigate } from 'react-router-dom';
 import * as React  from 'react';
-import Backdrop from '@mui/material/Backdrop';
-import Box from '@mui/material/Box';
-import Modal from '@mui/material/Modal';
-import Fade from '@mui/material/Fade';
-import Typography from '@mui/material/Typography';
+import { Modal, Backdrop, Box, Fade, Typography } from '@mui/material';
 import img from '../assets/gafar.jpeg'
 import { useState } from 'react';
 import { useMember, MemberInfo } from '../context/membercontext';
@@ -34,9 +30,9 @@ const Members: React.FC = () => {
         setDeleteItemId(null);
     };
 
-    const handleRemoveMember = (id: number) => {
-        if (id) {
-            removeMember(id);
+    const handleRemoveMember = () => {
+        if (deleteItemId !== null) {
+            removeMember(deleteItemId);
         }
         handleClose();
     };
@@ -204,8 +200,7 @@ const Members: React.FC = () => {
                 <DeleteModal
                     open={open}
                     onClose={handleClose}
-                    onConfirm={() => handleRemoveMember(deleteItemId)}
-                    itemId={deleteItemId}
+                    onConfirm={handleRemoveMember}
                 />   
                 <div className='flex justify-between p-8 border w-[1000px] lg:w-full'>
                     <p className='text-[#707370]'>Showing {Math.min(manufacturerProduct.length, currentPage * itemsPerPage)} of {manufacturerProduct.length} results</p>
