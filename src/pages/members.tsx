@@ -9,6 +9,7 @@ import img from '../assets/gafar.jpeg'
 import { useState } from 'react';
 import { useMember, MemberInfo } from '../context/membercontext';
 import StarRating from '../component/rating';
+import { DeleteModal } from '../context/memberReducer';
 
 const Members: React.FC = () => {
     const [open, setOpen] = useState(false);
@@ -17,15 +18,26 @@ const Members: React.FC = () => {
     const { removeMember, getAllMembers, editMembers, searchMembers } = useMember();
     const manufacturerProduct = getAllMembers();
     const [searchQuery, setSearchQuery] = React.useState('');
+    const [deleteItemId, setDeleteItemId] = useState<number | null>(null)
     
     const itemsPerPage = 5;
     const [editingMember, setEditingMember] = useState<MemberInfo | null>(null);
-    const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
     const handleEditClose = () => setEditOpen(false);
 
+    const handleOpen = (id: number) => {
+        setDeleteItemId(id);
+        setOpen(true);
+    };
+
+    const handleClose = () => {
+        setOpen(false);
+        setDeleteItemId(null);
+    };
+
     const handleRemoveMember = (id: number) => {
-        removeMember(id);
+        if (id) {
+            removeMember(id);
+        }
         handleClose();
     };
     const handleEditMember = (member: MemberInfo) => {
@@ -89,6 +101,7 @@ const Members: React.FC = () => {
                         <th>Email</th>
                         <th>Role</th>
                         <th>Rating</th>
+                        <th></th>
                     </tr>
                     </thead>
                     <tbody className=''>
@@ -108,110 +121,92 @@ const Members: React.FC = () => {
                                 <td className=''>{item.email}</td>
                                 <td className=''>{item.address?.city}</td>
                                 <td className=''><StarRating rating={item.rating} /></td>
-                                <button className="" onClick={handleOpen}><span className="material-symbols-outlined text-[#707370] me-5">delete</span></button>
-                                {open ? <div>
-                                    <Modal
-                                        aria-labelledby="transition-modal-title"
-                                        aria-describedby="transition-modal-description"
-                                        open={open}
-                                        onClose={handleClose}
-                                        closeAfterTransition
-                                        slots={{ backdrop: Backdrop }}
-                                        slotProps={{
-                                            backdrop: {
-                                            timeout: 500,
-                                            },
+                                <td>
+                                    <button className="" onClick={() => handleOpen(item.id)}><span className="material-symbols-outlined text-[#707370] me-5">delete</span></button>
+                                    
+                                    <button className="" onClick={() => {handleEditMember(item)}}><span className="material-symbols-outlined text-[#707370]">edit</span></button>
+                                    {editingMember && (
+                                        <Modal
+                                            aria-labelledby='transition-modal-title'
+                                            aria-describedby='transition-modal-description'
+                                            open={editOpen}
+                                            onClose={handleEditClose}
+                                            closeAfterTransition
+                                            slots={{ backdrop: Backdrop }}
+                                            slotProps={{
+                                                backdrop: {
+                                                timeout: 500,
+                                                },
                                         }}
-                                    >
-                                        <Fade in={open}>
-                                            <Box className='absolute w-[80%] top-[200px] left-[30px] md:top-[30%] md:left-[30%] text-center md:pt-8 rounded-md md:w-[600px] md:h-[150px] bg-white'>
-                                                <Typography id="transition-modal-title" className='text-[10px]'>
-                                                    Are you sure you want to delete this member?
+                                        >
+                                            <Fade in={editOpen}>
+                                                <Box className='bg-white lg:w-[400px] absolute md:top-[10%] lg:left-[30%] h-[500px] p-3'>
+                                                <Typography id='transition-modal-title' variant='h6' component='h2'>
+                                                    Edit Member Details{item.id}
                                                 </Typography>
-                                                <Typography id="transition-modal-description" sx={{ mt: 2 }}>
-                                                    <button className='bg-[#df0000] hover:bg-[#df4040] text-white font-normal py-2 px-3 me-4 rounded-md' onClick={() => handleRemoveMember(item.id)}>Yes</button>
-                                                    <button className='border py-2 px-3 hover:bg-[#E4F4F3] rounded-md' onClick={handleClose}>No</button>
-                                                </Typography>
-                                            </Box>
-                                        </Fade>
-                                    </Modal>
-                                </div> : null}
-                                <button className="" onClick={() => {handleEditMember(item)}}><span className="material-symbols-outlined text-[#707370]">edit</span></button>
-                                {editingMember && (
-                                    <Modal
-                                        aria-labelledby='transition-modal-title'
-                                        aria-describedby='transition-modal-description'
-                                        open={editOpen}
-                                        onClose={handleEditClose}
-                                        closeAfterTransition
-                                        slots={{ backdrop: Backdrop }}
-                                        slotProps={{
-                                            backdrop: {
-                                            timeout: 500,
-                                            },
-                                    }}
-                                    >
-                                        <Fade in={editOpen}>
-                                            <Box className='bg-white lg:w-[400px] absolute md:top-[10%] lg:left-[30%] h-[500px] p-3'>
-                                            <Typography id='transition-modal-title' variant='h6' component='h2'>
-                                                Edit Member Details
-                                            </Typography>
-                                            <form onSubmit={handleFormSubmit}>
-                                                <div className='m-4'>
-                                                    <label>Name:</label>
+                                                <form onSubmit={handleFormSubmit}>
+                                                    <div className='m-4'>
+                                                        <label>Name:</label>
+                                                        <input
+                                                            className='border rounded-md h-[40px] w-[350px] pl-4 flex'
+                                                            type='text'
+                                                            value={editingMember.name}
+                                                            onChange={(e) => setEditingMember({ ...editingMember, name: e.target.value })}
+                                                        />
+                                                    </div>
+                                                    <div className='m-4'>
+                                                    <label>Username:</label>
                                                     <input
                                                         className='border rounded-md h-[40px] w-[350px] pl-4 flex'
                                                         type='text'
-                                                        value={editingMember.name}
-                                                        onChange={(e) => setEditingMember({ ...editingMember, name: e.target.value })}
+                                                        value={editingMember.username}
+                                                        onChange={(e) => setEditingMember({ ...editingMember, username: e.target.value })}
                                                     />
-                                                </div>
-                                                <div className='m-4'>
-                                                <label>Username:</label>
-                                                <input
-                                                    className='border rounded-md h-[40px] w-[350px] pl-4 flex'
-                                                    type='text'
-                                                    value={editingMember.username}
-                                                    onChange={(e) => setEditingMember({ ...editingMember, username: e.target.value })}
-                                                />
-                                                </div>
-                                                <div className='m-4'>
-                                                <label>Email:</label>
-                                                <input
-                                                    className='border rounded-md h-[40px] w-[350px] pl-4 flex'
-                                                    type='text'
-                                                    value={editingMember.email}
-                                                    onChange={(e) => setEditingMember({ ...editingMember, email: e.target.value })}
-                                                />
-                                                </div>
-                                                <div className='m-4'>
-                                                <label>Roles:</label>
-                                                <input
-                                                    className='border rounded-md h-[40px] w-[350px] pl-4 flex'
-                                                    type='text'
-                                                    value={editingMember.city}
-                                                    onChange={(e) => setEditingMember({ ...editingMember, city: e.target.value })}
-                                                />
-                                                </div>
-                                                <div>
-                                                    <label>Rating:</label>
-                                                    <StarRating rating={editingMember.rating} onChange={handleRatingChange} />
-                                                </div>
-                                                <div className='mt-5 text-center'>
-                                                <button type='submit' className='bg-[#df0000] hover:bg-[#df4040] text-white font-normal py-2 px-3 me-4 rounded-md'>Save</button>
-                                                <button type='button' className='hover:bg-[#E4F4F3] text-black font-normal py-2 px-3 me-4 rounded-md' onClick={handleEditClose}>
-                                                    Cancel
-                                                </button>
-                                                </div>
-                                            </form>
-                                            </Box>
-                                        </Fade>
-                                    </Modal>
-                            )}
+                                                    </div>
+                                                    <div className='m-4'>
+                                                    <label>Email:</label>
+                                                    <input
+                                                        className='border rounded-md h-[40px] w-[350px] pl-4 flex'
+                                                        type='text'
+                                                        value={editingMember.email}
+                                                        onChange={(e) => setEditingMember({ ...editingMember, email: e.target.value })}
+                                                    />
+                                                    </div>
+                                                    <div className='m-4'>
+                                                    <label>Roles:</label>
+                                                    <input
+                                                        className='border rounded-md h-[40px] w-[350px] pl-4 flex'
+                                                        type='text'
+                                                        value={editingMember.city}
+                                                        onChange={(e) => setEditingMember({ ...editingMember, city: e.target.value })}
+                                                    />
+                                                    </div>
+                                                    <div>
+                                                        <label>Rating:</label>
+                                                        <StarRating rating={editingMember.rating} onChange={handleRatingChange} />
+                                                    </div>
+                                                    <div className='mt-5 text-center'>
+                                                    <button type='submit' className='bg-[#df0000] hover:bg-[#df4040] text-white font-normal py-2 px-3 me-4 rounded-md'>Save</button>
+                                                    <button type='button' className='hover:bg-[#E4F4F3] text-black font-normal py-2 px-3 me-4 rounded-md' onClick={handleEditClose}>
+                                                        Cancel
+                                                    </button>
+                                                    </div>
+                                                </form>
+                                                </Box>
+                                            </Fade>
+                                        </Modal>
+                                    )}
+                                </td>
                           </tr>
                         ))}
                     </tbody>
-                </table>    
+                </table> 
+                <DeleteModal
+                    open={open}
+                    onClose={handleClose}
+                    onConfirm={() => handleRemoveMember(deleteItemId)}
+                    itemId={deleteItemId}
+                />   
                 <div className='flex justify-between p-8 border w-[1000px] lg:w-full'>
                     <p className='text-[#707370]'>Showing {Math.min(manufacturerProduct.length, currentPage * itemsPerPage)} of {manufacturerProduct.length} results</p>
                     <div>
@@ -229,3 +224,4 @@ const Members: React.FC = () => {
 }
 
 export default Members
+
